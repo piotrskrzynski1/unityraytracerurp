@@ -14,7 +14,7 @@ public class CustomRenderPassFeature : ScriptableRendererFeature
 
         public bool Accumulate = true;
         public bool first = true;
-        public int numRenderedFrames = 0;
+        public int numRenderedFrames = 1;
 
         private int prevScreenWidth = 0;
         private int prevScreenHeight = 0;
@@ -36,8 +36,6 @@ public class CustomRenderPassFeature : ScriptableRendererFeature
             {
                 prevRender = new RenderTexture(cam.width, cam.height, 0, RenderTextureFormat.ARGBFloat);
                 prevRender.enableRandomWrite = true;
-                prevRender.filterMode = FilterMode.Bilinear;
-                prevRender.wrapMode = TextureWrapMode.Clamp;
             }
         }
 
@@ -76,18 +74,15 @@ public class CustomRenderPassFeature : ScriptableRendererFeature
             {
                 cmd.Blit(null, currRender, raytraceMaterial);
                 numRenderedFrames++;
+
                 raytraceMaterial.SetInt("NumRenderedFrames", numRenderedFrames);
 
                 averageMaterial.SetInt("NumRenderedFrames", numRenderedFrames);
                 averageMaterial.SetTexture("currRender", currRender);
                 averageMaterial.SetTexture("prevRender", prevRender);
 
-                RenderTexture temp = RenderTexture.GetTemporary(currRender.width, currRender.height, 0);
-
-                cmd.Blit(currRender, temp, averageMaterial);
-                cmd.Blit(temp, prevRender);
-                cmd.Blit(temp, source);
-                temp.Release();
+                cmd.Blit(currRender, source, averageMaterial);
+                Blit(cmd, source, prevRender);
             }
             else
             {
@@ -102,7 +97,6 @@ public class CustomRenderPassFeature : ScriptableRendererFeature
         public override void OnCameraCleanup(CommandBuffer cmd)
         {
             currRender.Release();
-
         }
     }
 

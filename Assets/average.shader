@@ -45,6 +45,7 @@ Shader "Unlit/Average"
             fixed4 frag(v2f i) : SV_Target
             {
                 // Sample previous and current frame render textures
+
                 float4 oldRender = tex2D(prevRender, i.uv); 
                 float4 newRender = tex2D(currRender, i.uv);
 
@@ -59,11 +60,7 @@ Shader "Unlit/Average"
                    return float4(1,0,0,1);
                    }else{return float4(1,1,1,1);} */
 
-                   if(i.uv.x<=0.5){
-                       return oldRender;
-                       } else{
-                           return newRender;
-                           }
+                   return blendedColor;
                         
             }
             ENDCG
